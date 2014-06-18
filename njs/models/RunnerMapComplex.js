@@ -25,6 +25,7 @@ provoda.HModel.extendTo(RunMap, {
 		this.wch(this.map_parent.map_parent, 'selected_time');
 		this.updateState('geodata', geodata);
 		cvsloader.on('load', function(cvs_data) {
+			this.updateState('current_runners_data', cvs_data);
 			this.updateState('cvs_data', cvs_data);
 		}, this.getContextOpts());
 	}

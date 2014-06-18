@@ -168,15 +168,15 @@ provoda.View.extendTo(RunMapCtr, {
 		}
 	},
 	'compx-genderpaths': {
-		depends_on: ['cvs_data'],
-		fn: function(cvs_data) {
-			if (!cvs_data){
+		depends_on: ['current_runners_data'],
+		fn: function(current_runners_data) {
+			if (!current_runners_data){
 				return;
 			}
 			this.knodes.age_areas = {};
 
 
-			var array = cvs_data.runners_groups.slice().reverse();
+			var array = current_runners_data.runners_groups.slice().reverse();
 			var _this = this;
 			array.forEach(function(el) {
 				var grad = _this.parent_view.parent_view.gender_grads[el.gender];
@@ -293,22 +293,22 @@ provoda.View.extendTo(RunMapCtr, {
 		}
 	},
 	'compx-runners_rate':{
-		depends_on: ['basepathch', 'cvs_data'],
-		fn: function(basepathch, cvs_data){
-			if (!basepathch || !cvs_data){
+		depends_on: ['basepathch', 'cvs_data', 'current_runners_data'],
+		fn: function(basepathch, cvs_data, current_runners_data){
+			if (!basepathch || !cvs_data || !current_runners_data){
 				return;
 			}
-			return mh.getStepHeight(this.knodes, 735, 300, cvs_data.items, cvs_data.start_time, this.total_distance, 1000);
+			return mh.getStepHeight(this.knodes, 735, 300, current_runners_data.items, cvs_data.start_time, this.total_distance, 1000);
 		}
 	},
 	'compx-draw': {
-		depends_on: ['basepathch', 'cvs_data', 'time_value'],
-		fn: function(basepathch, cvs_data, time_value) {
-			if (!basepathch || !cvs_data || typeof time_value == 'undefined'){
+		depends_on: ['basepathch', 'cvs_data', 'time_value', 'current_runners_data'],
+		fn: function(basepathch, cvs_data, time_value, current_runners_data) {
+			if (!basepathch || !cvs_data || typeof time_value == 'undefined' || !current_runners_data){
 				return;
 			}
-			var data = mh.getPoints(cvs_data.runners_groups, this.knodes, time_value, false, cvs_data.start_time, this.total_distance);
-			mh.drawRunnersPoints(colors, this.parent_view.parent_view.gender_grads, data, cvs_data.items, this.knodes, time_value, cvs_data.start_time);
+			var data = mh.getPoints(current_runners_data.runners_groups, this.knodes, time_value, false, cvs_data.start_time, this.total_distance);
+			mh.drawRunnersPoints(colors, this.parent_view.parent_view.gender_grads, data, current_runners_data.items, this.knodes, time_value, cvs_data.start_time);
 			//console.log();
 			//	xAxis.attr("x1", t[0]).attr("x2", t[0]);
 			//yAxis.attr("y1", t[1]).attr("y2", t[1]);
