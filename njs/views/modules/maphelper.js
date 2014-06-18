@@ -391,7 +391,7 @@ var getBasePoints = function(base, boundrect, total_distance){
 	}
 };
 
-var drawRunnersPoints = function(colors, grads, data, cvs_data, knodes, seconds, start_time) {
+var drawRunnersPoints = function(colors, grads, data, cvs_data_items, knodes, seconds, start_time) {
 	var p_w = 3;
 	//var p_h = 3;
 	var getSQPoint = function(width, num) {
@@ -448,7 +448,7 @@ var drawRunnersPoints = function(colors, grads, data, cvs_data, knodes, seconds,
 		place.selectAll('*').remove();
 
 		var dfrag = document.createDocumentFragment();
-		var steps_runners = getStepsRunners(cvs_data.items, data.complects, seconds, start_time, true);
+		var steps_runners = getStepsRunners(cvs_data_items, data.complects, seconds, start_time, true);
 
 	//	var base_items = getAreaByData(, , complects, seconds, data.step, start_time);
 
@@ -483,7 +483,7 @@ var drawRunnersPoints = function(colors, grads, data, cvs_data, knodes, seconds,
 };
 
 
-var getPoints = function(cvs_data, knodes, seconds, animate, start_time, total_distance) {
+var getPoints = function(runners_groups, knodes, seconds, animate, start_time, total_distance) {
 	var i;
 
 	var boundrect = knodes.base.node().getBoundingClientRect();
@@ -512,15 +512,15 @@ var getPoints = function(cvs_data, knodes, seconds, animate, start_time, total_d
 	var areas = {};
 	//areas.push(getAreaPathData(getAreaByData(cvs, complects, complects), complects));
 	var prev;
-	cvs_data.runners_groups.forEach(function(el, i) {
+	runners_groups.forEach(function(el, i) {
 		var prev_districts = (i === 0) ? complects : prev;
 		areas_data[el.key] = getAreaByData(el.runners, complects, prev_districts, seconds, data.step, start_time);
 		prev = areas_data[el.key];
 	});
-	cvs_data.runners_groups.forEach(function(el) {
+	runners_groups.forEach(function(el) {
 		areas[el.key] = getAreaPathData(areas_data[el.key], complects, complects);
 	});
-	cvs_data.runners_groups.forEach(function(el) {
+	runners_groups.forEach(function(el) {
 		if (false && animate){
 			knodes.age_areas[el.key].transition()
 				.duration(100)

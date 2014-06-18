@@ -1,13 +1,27 @@
 define(['provoda', 'jquery', 'spv'], function(provoda, $, spv) {
 "use strict";
-var eventor = new provoda.Eventor();
-eventor.init();
 var cvs_data;
-eventor.onRegistration('load', function(cb) {
+
+
+var Cvsloader = function() {};
+provoda.Eventor.extendTo(Cvsloader, {
+	'regfr-cvload': {
+		test: function(namespace) {
+			return namespace.indexOf('load') === 0;
+		},
+		fn: function() {
+			return cvs_data;
+		},
+	}
+});
+var eventor = new Cvsloader();
+eventor.init();
+
+/*eventor.onRegistration('load', function(cb) {
 	if (cvs_data){
 		cb(cvs_data);
 	}
-});
+});*/
 
 
 var checkData = function() {

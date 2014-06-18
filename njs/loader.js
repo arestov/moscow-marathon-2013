@@ -31,18 +31,32 @@ requirejs.config({
 	}
 });
 
-require(['models/AppModel', 'views/AppView', 'angbo'], function(AppModel, AppView) {
-	var app = new AppModel();
-	app.init();
-	window.app = app;
+require(['models/AppModel', 'views/AppView', 'angbo', 'provoda'], function(AppModel, AppView, angbo, provoda) {
+	var md = new AppModel();
+	md.init();
+	window.app = md;
 
-	var view = new AppView();
-	app.mpx.addView(view, 'root');
+	var proxies_space = Date.now();
+	var views_proxies = provoda.views_proxies;
+	views_proxies.addSpaceById(proxies_space, md);
+	var mpx = views_proxies.getMPX(proxies_space, md);
 
-	view.init({
-		mpx: app.mpx
-	}, {d: window.document});
-	view.requestAll();
+
+
+	(function() {
+		var view = new AppView();
+		mpx.addView(view, 'root');
+		view.init({
+			mpx: mpx,
+			proxies_space: proxies_space
+		}, {d: window.document, angbo: angbo});
+		view.onDie(function() {
+			//views_proxies.removeSpaceById(proxies_space);
+			view = null;
+		});
+		view.requestAll();
+	})();
+
 });
 
 })();

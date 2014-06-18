@@ -53,6 +53,7 @@ AppBaseView.extendTo(AppView, {
 		
 	},
 	handleStartScreen: function(start_screen) {
+		return;
 		var st_scr_scrl_con = start_screen.parent();
 		var start_page_wrap = st_scr_scrl_con.parent();
 		var tpl = this.buildTemplate();

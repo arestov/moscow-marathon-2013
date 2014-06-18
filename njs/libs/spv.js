@@ -44,6 +44,15 @@ var hasArg = function(el) {return el;};
 spv.hasEveryArgs = function() {
 	return Array.prototype.every.call(arguments, hasArg);
 };
+spv.getExistingItems = function(arr) {
+	var result = [];
+	for (var i = 0; i < arr.length; i++) {
+		if (arr[i]){
+			result.push(arr[i]);
+		}
+	}
+	return result;
+};
 
 addEvent = spv.addEvent = window.addEventListener ?
 function(elem, evType, fn){
@@ -56,15 +65,25 @@ function(elem, evType, fn){
 };
 removeEvent = spv.removeEvent = window.addEventListener ?
 function(elem, evType, fn){
+	if (!elem.removeEventListener){
+		return;
+	}
 	elem.removeEventListener(evType, fn, false);
 }:
 function(elem, evType, fn){
+	if (!elem.detachEvent){
+		return;
+	}
 	elem.detachEvent('on' + evType, fn);
 };
 getDefaultView = spv.getDefaultView = function(d) {
 	return d.defaultView || d.parentWindow;
 };
 domReady = spv.domReady = function(d, callback){
+	var wndw = spv.getDefaultView(d);
+	if (!wndw){
+		return;
+	}
 	if (d.readyState == 'complete' || d.readyState == 'loaded' || d.readyState == "interactive"){
 		callback();
 	} else{
@@ -72,12 +91,12 @@ domReady = spv.domReady = function(d, callback){
 		var f = function(){
 			if (!done){
 				done = true;
-				spv.removeEvent(spv.getDefaultView(d), 'load', f);
+				spv.removeEvent(wndw, 'load', f);
 				spv.removeEvent(d, 'DOMContentLoaded', f);
 				callback();
 			}
 		};
-		spv.addEvent(spv.getDefaultView(d), 'load', f);
+		spv.addEvent(wndw, 'load', f);
 		spv.addEvent(d, 'DOMContentLoaded', f);
 	}
 };
@@ -100,19 +119,47 @@ doesContain = spv.doesContain = function(target, valueOf){
 	}
 	return -1;
 };
+spv.hasCommonItems = function(arr1, arr2) {
+	if (!arr2){
+		return false;
+	}
+	for (var i = 0; i < arr1.length; i++) {
+		if (arr2.indexOf(arr1[i]) != -1){
+			return true;
+		}
+	}
+	return false;
+};
+
+
+var arExclSimple = function(result, arr, obj) {
+	for (var i = 0; i < arr.length; i++) {
+		if (arr[i] !== obj) {
+			result.push(arr[i]);
+		}
+	}
+	return result;
+};
+var arExclComplex = function(result, arr, obj) {
+	for (var i = 0; i < arr.length; i++) {
+		if (obj.indexOf(arr[i]) == -1){
+			result.push(arr[i]);
+		}
+	}
+	return result;
+};
+
 arrayExclude = spv.arrayExclude = function(arr, obj){
 	var r = [];
 	if (!arr){
 		return r;
 	}
 
-	obj = spv.toRealArray(obj);
-	for (var i = 0; i < arr.length; i++) {
-		if (obj.indexOf(arr[i]) == -1){
-			r.push(arr[i]);
-		}
+	if (obj instanceof Array){
+		return arExclComplex(r, arr, obj);
+	} else {
+		return arExclSimple(r, arr, obj);
 	}
-	return r;
 };
 
 shuffleArray = spv.shuffleArray = function(obj) {
@@ -245,7 +292,7 @@ getStringPattern = function (str) {
 spv.getStringPattern = getStringPattern;
 
 ttime = function(f){
-	var d = +new Date();
+	var d = Date.now();
 
 	if (f){
 		f();
@@ -304,7 +351,7 @@ getTargetField = function(obj, tree){
 	var nothing;
 	var target = obj;
 	for (var i=0; i < tree.length; i++) {
-		if (target[tree[i]] !== nothing){
+		if (target[tree[i]] != nothing){
 			target = target[tree[i]];
 		} else{
 			return;
@@ -428,35 +475,40 @@ makeIndexByField = spv.makeIndexByField = function(array, field, keep_case){
 
 
 $filter = function(array, field, value_or_testfunc){
-	var r = [];
+	var i, r = [];
 	r.not = [];
 	if (!array){return r;}
-	for (var i=0; i < array.length; i++) {
-		if (array[i]){
-			if (value_or_testfunc){
-				if (typeof value_or_testfunc == 'function'){
-					if (value_or_testfunc(spv.getTargetField(array[i], field))){
-						r.push(array[i]);
-					} else{
-						r.not.push(array[i]);
-					}
+
+	if (value_or_testfunc){
+		for (i = 0; i < array.length; i++) {
+			if (!array[i]){
+				continue;
+			}
+			if (typeof value_or_testfunc == 'function'){
+				if (value_or_testfunc(spv.getTargetField(array[i], field))){
+					r.push(array[i]);
 				} else{
-					if (spv.getTargetField(array[i], field) === value_or_testfunc){
-						r.push(array[i]);
-					} else{
-						r.not.push(array[i]);
-					}
+					r.not.push(array[i]);
 				}
-				
 			} else{
-				var field_value = spv.getTargetField(array[i], field);
-				if (field_value){
-					r.push(field_value);
+				if (spv.getTargetField(array[i], field) === value_or_testfunc){
+					r.push(array[i]);
 				} else{
 					r.not.push(array[i]);
 				}
 			}
-			
+		}
+	} else {
+		for (i = 0; i < array.length; i++) {
+			if (!array[i]){
+				continue;
+			}
+			var field_value = spv.getTargetField(array[i], field);
+			if (field_value){
+				r.push(field_value);
+			} else{
+				r.not.push(array[i]);
+			}
 		}
 	}
 	return r;
@@ -471,6 +523,9 @@ cloneObj= spv.cloneObj = function(acceptor, donor, black_list, white_list){
 	var prop;
 	if (black_list || white_list){
 		for(prop in donor){
+			if (!donor.hasOwnProperty(prop)){
+				continue;
+			}
 			if (!white_list || !!~white_list.indexOf(prop)){
 				if (!black_list || !~black_list.indexOf(prop)){
 					_no[prop] = donor[prop];
@@ -479,20 +534,15 @@ cloneObj= spv.cloneObj = function(acceptor, donor, black_list, white_list){
 		}
 	} else {
 		for(prop in donor){
+			if (!donor.hasOwnProperty(prop)){
+				continue;
+			}
 			_no[prop] = donor[prop];
 		}
 	}
 	return _no;
 };
-spv.mapProps = function(props_map, donor, acceptor) {
-	for (var name in props_map){
-		var value = spv.getTargetField(donor, props_map[name]);
-		if (typeof value != 'undefined'){
-			spv.setTargetField(acceptor, name, value);
-		}
-	}
-	return acceptor;
-};
+
 getUnitBaseNum = function(_c){
 	if (_c > 0){
 		if (_c > 10 && _c < 20){
@@ -587,7 +637,12 @@ separateNum = function(num){
 	Class = function(){};
 
 	// Create a new Class that inherits from this class
-	Class.extendTo = function(namedClass, prop) {
+	Class.extendTo = function(namedClass, props) {
+		if (typeof props == 'function') {
+			//props
+			props = spv.coe(props);
+		}
+
 		var _super = this.prototype;
 
 		// Instantiate a base class (but only create the instance,
@@ -595,12 +650,12 @@ separateNum = function(num){
 		var prototype = new this();
 
 		// Copy the properties over onto the new prototype
-		for (var name in prop) {
+		for (var prop_name in props) {
 			// Check if we're overwriting an existing function
-			prototype[name] = typeof prop[name] == "function" &&
-				typeof _super[name] == "function" && fnTest.test(prop[name]) ?
-				allowParentCall(name, prop[name], _super) :
-				prop[name];
+			prototype[prop_name] = typeof props[prop_name] == "function" &&
+				typeof _super[prop_name] == "function" && fnTest.test(props[prop_name]) ?
+				allowParentCall(prop_name, props[prop_name], _super) :
+				props[prop_name];
 		}
 
 		// Populate our constructed prototype object
@@ -610,7 +665,7 @@ separateNum = function(num){
 		namedClass.prototype.constructor = namedClass;
 
 		if (namedClass.prototype.onExtend){
-			namedClass.prototype.onExtend.call(namedClass.prototype);
+			namedClass.prototype.onExtend.call(namedClass.prototype, props);
 		}
 
 		// And make this class extendable
@@ -785,5 +840,331 @@ spv.throttle = throttle;
 spv.debounce = debounce;
 spv.filter = $filter;
 
+
+
+spv.zerofyString = function(string, length) {
+	if (typeof string != 'string'){
+		string = '' + string;
+	}
+	while (string.length < length){
+		string = '0' + string;
+	}
+	return string;
+};
+
+
+var getFullFieldPath = function(last_part, data) {
+	var cur = data;
+	var result = [last_part];
+	while (cur && cur.prop_name) {
+		result.unshift(cur.prop_name);
+		cur = cur.parent;
+	}
+	return result.join('.');
+};
+
+
+var getPropsListByTree = function(obj) {
+	var all_objects = [{
+		parent: null,
+		prop_name: '',
+		obj: obj
+	}];
+	var cur, i, prop_name;
+	var objects_list = [];
+	var result_list = [];
+
+	while (all_objects.length) {
+		cur = all_objects.shift();
+		for (prop_name in cur.obj){
+			if (!cur.obj.hasOwnProperty(prop_name) || !cur.obj[prop_name]){
+				continue;
+			}
+			if (Array.isArray(cur.obj[prop_name])) {
+				continue;
+			}
+			if (typeof cur.obj[prop_name] == 'object'){
+				all_objects.push({
+					parent: cur,
+					prop_name: prop_name,
+					obj: cur.obj[prop_name]
+				});
+			}
+		}
+		objects_list.push(cur);
+	}
+
+	for (i = 0; i < objects_list.length; i++) {
+		cur = objects_list[i];
+		for (prop_name in cur.obj){
+			if (!cur.obj.hasOwnProperty(prop_name)){
+				continue;
+			}
+			if (typeof cur.obj[prop_name] == 'string' || !cur.obj[prop_name] || Array.isArray(cur.obj[prop_name])){
+				result_list.push({
+					field_path: getFullFieldPath(prop_name, cur),
+					field_path_value: cur.obj[prop_name]
+				});
+			}
+		}
+	}
+	return result_list;
+
+
+};
+
+spv.mapProps = function(props_map, donor, acceptor) {
+	for (var name in props_map){
+		var value = spv.getTargetField(donor, props_map[name]);
+		if (typeof value != 'undefined'){
+			spv.setTargetField(acceptor, name, value);
+		}
+	}
+	return acceptor;
+};
+var parseMap = function(map) {
+
+	//var root = map;
+
+	var all_targets = [map];
+	var full_list = [];
+	var cur, i;
+
+	while (all_targets.length){
+		cur = all_targets.shift();
+		if (cur.parts_map) {
+			for (var prop_name in cur.parts_map){
+				if (!cur.parts_map.hasOwnProperty(prop_name)){
+					continue;
+				}
+				var child_part = cur.parts_map[prop_name];
+				if (typeof child_part.props_map == 'string' && child_part.parts_map) {
+					console.log(['you can not have parts in', child_part, 'since it is simple string from field:' + child_part.props_map]);
+					throw new Error('you can not have parts in this place since it is simple string from field:' + child_part.props_map);
+				}
+				all_targets.push(child_part);
+			}
+		}
+		full_list.push(cur);
+	}
+
+
+	for (i = 0; i < full_list.length; i++) {
+		cur = full_list[i];
+		//cur.props_map
+
+		if (typeof cur.props_map == 'object' && !Array.isArray(cur.props_map)) {
+			var full_propslist = getPropsListByTree(cur.props_map);
+		//	console.log(full_propslist);
+			cur.props_map = full_propslist;
+		}
+		
+	}
+
+
+	return map;
+	//'весь список подчинённостей';
+	//''
+};
+
+var parent_count_regexp = /^\^+/gi;
+
+var getPropValueByField = function(fpv, iter, scope, spec_data) {
+	var source_data = scope;
+	var state_name = fpv;
+	if (fpv.indexOf('^') === 0){
+		state_name = fpv.replace(parent_count_regexp, '');
+		var count = fpv.length - state_name.length;
+		while (count) {
+			--count;
+			source_data = iter.parent_data;
+			if (!source_data) {
+				break;
+			}
+		}
+		//states_of_parent[fpv] = this.prsStCon.parent(fpv);
+	} else if (fpv.indexOf('@') === 0) {
+		throw new Error('');
+		//states_of_nesting[fpv] = this.prsStCon.nesting(fpv);
+	} else if (fpv.indexOf('#') === 0) {
+		state_name = fpv.replace('#', '');
+		source_data = spec_data;
+		if (!spec_data) {
+			throw new Error();
+		}
+		//states_of_root[fpv] = this.prsStCon.root(fpv);
+	}
+	return getTargetField(source_data, state_name);
+};
+
+var getComplexPropValueByField = function(fpv, scope, iter, spec_data, converters) {
+
+	
+
+	var cur_value;
+
+
+	if (typeof fpv == 'string') {
+		cur_value = getPropValueByField(fpv, iter, scope, spec_data);
+	} else if (Array.isArray(fpv)) {
+		if (fpv.length > 1) {
+			var convert = fpv[0];
+
+			if (typeof convert == 'string' ) {
+				convert = converters[convert];
+			}
+
+			cur_value = convert(fpv[1] && getPropValueByField(fpv[1], iter, scope, spec_data));
+		} else {
+			cur_value = fpv[0];
+		}
+		
+	}
+	return cur_value;
+};
+
+var getTargetProps = function(obj, scope, iter, spec_data, converters) {
+	for (var i = 0; i < iter.map_opts.props_map.length; i++) {
+		var cur = iter.map_opts.props_map[i];
+
+		var fpv = cur.field_path_value;
+		if (!fpv) {
+			fpv = cur.field_path;
+		}
+
+		var cur_value = getComplexPropValueByField(fpv, scope, iter, spec_data, converters);
+
+		spv.setTargetField(obj, cur.field_path, cur_value);
+	}
+
+};
+
+var handlePropsMapScope = function(spec_data, cur, objects_list, scope, converters) {
+	if (typeof cur.map_opts.props_map == 'string') {
+		return getComplexPropValueByField(cur.map_opts.props_map, scope, cur, spec_data, converters);
+	}
+
+	var result_value_item = {};
+	getTargetProps(result_value_item, scope, cur, spec_data, converters);
+
+	for (var prop_name in cur.map_opts.parts_map) {
+		//cur.map_opts.parts_map[prop_name];
+		var map_opts = cur.map_opts.parts_map[prop_name];
+
+		var result_value = map_opts.is_array ? [] : {} ;//объект используемый потомками создаётся в контексте родителя, что бы родитель знал о потомках
+		spv.setTargetField(result_value_item, prop_name, result_value);//здесь родитель записывает информацию о своих потомках
+
+		objects_list.push({
+			map_opts: map_opts,
+			parent_data: scope,
+			parent_map: cur.map_opts,
+			writeable_array: result_value,
+
+			data_scope: null
+		});
+	}
+	return result_value_item;
+};
+
+var executeMap = function(map, data, spec_data, converters) {
+
+	var root_struc = {
+		map_opts: map,
+		parent_data: data,
+		parent_map: null,
+		writeable_array: map.is_array ? [] : {},
+		//writeable_array - объект или массив объектов получающихся в результате парсинга одной из областей видимости
+		//должен быть предоставлен потомку родителем
+
+		data_scope: null
+	};
+
+
+	var objects_list = [root_struc], result_item;
+
+	while (objects_list.length) {
+		var cur = objects_list.shift();
+
+
+		var cvalue;
+		if (cur.map_opts.source) {
+			cvalue = getTargetField(cur.parent_data, cur.map_opts.source);
+		} else {
+			cvalue = cur.parent_data;
+		}
+		
+		if (!cvalue) {
+			continue;
+		}
+
+		if (!cur.map_opts.is_array) {
+			cur.data_scope = cvalue;
+			result_item = handlePropsMapScope(spec_data, cur, objects_list, cur.data_scope, converters);
+			if (typeof result_item != 'object') {
+				throw new Error('use something more simple!');
+			}
+			spv.cloneObj(cur.writeable_array, result_item);
+		} else {
+			cur.data_scope = toRealArray( cvalue );
+			cur.writeable_array.length = cur.data_scope.length;
+			
+			for (var i = 0; i < cur.data_scope.length; i++) {
+				var scope = cur.data_scope[i];
+				cur.writeable_array[i] = handlePropsMapScope(spec_data, cur, objects_list, scope, converters);
+				
+				
+			}
+		}
+		
+
+
+
+	}
+
+	return root_struc.writeable_array;
+};
+
+
+var MorphMap = function(config, converters) {
+	this.config = config;
+	this.converters = converters;
+	this.pconfig = null;
+
+	var _this = this;
+	return function() {
+		return _this.execute.apply(_this, arguments);
+	};
+};
+MorphMap.prototype.execute = function(data, spec_data, converters) {
+	if (!this.pconfig) {
+		this.pconfig = parseMap(this.config);
+	}
+	return executeMap( this.pconfig, data, spec_data, converters || this.converters);
+};
+
+//var data_bymap = executeMap( parseMap(map), raw_testmap_data, {smile: '25567773'} );
+//console.log(data_bymap);
+
+spv.MorphMap = MorphMap;
+spv.mmap = function(config, converters) {
+	return new MorphMap(config, converters);
+};
+//i should not rewrite fields
+
+
+
+
+spv.coe = function(cb) {
+	var result = {};
+	var add = function(obj) {
+		spv.cloneObj(result, obj);
+	};
+	cb(add);
+	return result;
+};
+
 })();
+
+
+
 define(function(){return spv;});

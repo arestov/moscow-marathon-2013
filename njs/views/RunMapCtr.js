@@ -307,8 +307,8 @@ provoda.View.extendTo(RunMapCtr, {
 			if (!basepathch || !cvs_data || typeof time_value == 'undefined'){
 				return;
 			}
-			var data = mh.getPoints(cvs_data, this.knodes, time_value, false, cvs_data.start_time, this.total_distance);
-			mh.drawRunnersPoints(colors, this.parent_view.parent_view.gender_grads, data, cvs_data, this.knodes, time_value, cvs_data.start_time);
+			var data = mh.getPoints(cvs_data.runners_groups, this.knodes, time_value, false, cvs_data.start_time, this.total_distance);
+			mh.drawRunnersPoints(colors, this.parent_view.parent_view.gender_grads, data, cvs_data.items, this.knodes, time_value, cvs_data.start_time);
 			//console.log();
 			//	xAxis.attr("x1", t[0]).attr("x2", t[0]);
 			//yAxis.attr("y1", t[1]).attr("y2", t[1]);
