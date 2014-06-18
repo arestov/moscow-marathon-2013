@@ -153,8 +153,6 @@ provoda.View.extendTo(RunMapCompxCtr, {
 			});
 		}
 
-
-
 		var data = mh.formatPathPoints([p1, p2, p3]) + ' Z';
 
 		var style = {
@@ -164,10 +162,6 @@ provoda.View.extendTo(RunMapCompxCtr, {
 		this.legendcount.append('path')
 			.attr('d', data)
 			.style(style);
-
-		
-
-
 
 		for (var i = 0; i < lines.length; i++) {
 			var cur = lines[i];
@@ -242,23 +236,28 @@ provoda.View.extendTo(RunMapCompxCtr, {
 		depends_on: ['cvs_data'],
 		fn: function(cvs_data) {
 			var container = this.tpl.ancs['legendage'];
-			var width = container.width();
-			var height= container.height();
+			var width  = container.width();
+			var height = container.height();
 			var svg = this.legendage;
 			svg.selectAll('*').remove();
 			$(svg.node()).css('width', width);
 
 			var space = 1;
 			var vert_space = 1;
-			var half_width = width/2;
+			var half_width = width / 2;
 			//var _this = this;
 			
 			var max1 = cvs_data.big_genders_groups[1].age_groups.max;
 			var max2 = cvs_data.big_genders_groups[0].age_groups.max;
-
-			var width_factor = ((width - space)/2)/(max1 + max2);
-
 			
+			var lng1 = cvs_data.big_genders_groups[1].age_groups.lng;
+			var lng2 = cvs_data.big_genders_groups[0].age_groups.lng;
+
+            var height_factor = (height - vert_space * cvs_data.big_genders_groups[1].age_groups.length) / Math.max(lng1, lng2);
+            var width_factor  = height_factor * (width - space) / (2 * (max1 + max2));
+			
+            // var width_factor = 0.1;
+
 			var result_data = {
 				text_desc:[]
 			};
@@ -268,66 +267,100 @@ provoda.View.extendTo(RunMapCompxCtr, {
 			(function(){
 				var array = cvs_data.big_genders_groups[1].age_groups;
 				var grad = _this.gender_grads[1];
-
-				var el_height = Math.round((height - vert_space * (array.length - 1))/array.length);
 				var limit = half_width - space/2;
 				
+				var el_top = 0;
+				
+                // console.log(array);
+				
+				for (var i = 0; i < cvs_data.big_genders_groups[1].age_groups.length; i++) {
 
-				array.forEach(function(el, i) {
-					
+                    var cur = cvs_data.big_genders_groups[1].age_groups[i];
 
+                    var rstart = cvs_data.big_ages_ranges[i].start;
+                    var rend   = cvs_data.big_ages_ranges[i].end;
 
-					var y = el_height * i + vert_space * i;
-					var rwidth = (el.length * width_factor);
+                    // console.log(rstart);
+
+					var y = el_top;
+					var rheight = height_factor * (rend - rstart + 1);
+					var rwidth  = (cur.length * width_factor / rheight);
 					var x = limit - rwidth;
-					var color = colors.getGradColor(i+1, 1, array.length, grad);
+					                    
+					var color = colors.getGradColor(i, 1, array.length, grad);
 
 					svg.append('rect').attr({
 						x: x,
 						y: y,
-						width: rwidth,
-						height: el_height,
+						width:  rwidth,
+						height: rheight,
 						fill: color
 					});
-				//	console.log(el);
-				});
+
+                    // console.log(rstart, rend, color, x, y, rwidth, rheight);
+				
+				    el_top = el_top + rheight + vert_space;
+				};
 
 			})();
 
 			(function(){
 				var array = cvs_data.big_genders_groups[0].age_groups;
 				var grad = _this.gender_grads[0];
-
-				var el_height = Math.round((height - vert_space * (array.length - 1))/array.length);
 				var limit = half_width - space/2;
 				
+				var el_top = 0;
+				
+                // console.log(array);
+                
+                var max_length = 0;
+                
+                for (var i = 0; i < cvs_data.big_genders_groups[0].age_groups.length; i++) {
+                    var cur = cvs_data.big_genders_groups[0].age_groups[i];
 
-				array.forEach(function(el, i) {
-					
+                    var rstart = cvs_data.big_ages_ranges[i].start;
+                    var rend   = cvs_data.big_ages_ranges[i].end;
 
+					var rwidth  = (cur.length * width_factor / (height_factor * (rend - rstart + 1)));
+					                    
+					if (rwidth > max_length) {
+					    max_length = rwidth;
+					}                
+                }
+				
+				for (var i = 0; i < cvs_data.big_genders_groups[0].age_groups.length; i++) {
 
-					var y = el_height * i + vert_space * i;
-					var rwidth = (el.length * width_factor);
-					var x = (width - limit);
+                    var cur = cvs_data.big_genders_groups[0].age_groups[i];
 
-					
+                    var rstart = cvs_data.big_ages_ranges[i].start;
+                    var rend   = cvs_data.big_ages_ranges[i].end;
+
+                    // console.log(rstart);
+
+					var y = el_top;
+					var rheight = height_factor * (rend - rstart + 1);
+					var rwidth  = (cur.length * width_factor / rheight);
+					var x = width - limit;
+					                    
 					var color = colors.getGradColor(i+1, 1, array.length, grad);
 
 					svg.append('rect').attr({
 						x: x,
 						y: y,
-						width: rwidth,
-						height: el_height,
+						width:  rwidth,
+						height: rheight,
 						fill: color
 					});
 
+                    result_data.text_desc[i] = {
+                     x: x + max_length,
+                     y: y + rheight / 2
+                    };
 
-					result_data.text_desc[i] = {
-						x: x + rwidth,
-						y: y
-					};
-				//	console.log(el);
-				});
+                    // console.log(rstart, rend, color, x, y, rwidth, rheight);
+				
+				    el_top = el_top + rheight + vert_space;
+				};
 
 			})();
 			

@@ -175,9 +175,9 @@ path {
 		}
 
 	.legend{
-		width: 100px;
+		width: 120px;
 		float: right;
-		font-size: 13px;
+		font-size: 12px;
 		font-weight: 700;
 		margin-right: 15px;
 		}
@@ -188,12 +188,12 @@ path {
 			padding-right: 25px;
 		}
 		.legendcount_c .textblock{
-			font-size: 10px;
+			font-size: 9px;
 			margin-top:-7px;
 			margin-left: 5px;
 			}
 			.legendcount_c .svgcon{
-				height: 100px;
+				height: 50px;
 				position: relative;
 			}
 
@@ -201,20 +201,21 @@ path {
 
 		}
 		.legendage_c .svgcon{
-			height: 100px;
-			float:right;
-			width: 220px;
+/*          border: 1px #000000 solid;*/
+			height: 180px;
+			float: right;
+			width: 180px;
 			margin-right: -47px;
 		}
-		.svgcon svg{
-			max-width: 100%;
-			max-height:100%;
+		.svgcon svg {
+/*          max-width:  100%;*/
+/*          max-height: 150%;*/
 		}
 	.share{
 		padding-top:20px;
-		width: 115px;
+		width: 125px;
 		float: right;
-		font-size: 13px;
+		font-size: 12px;
 		clear: both;
 		overflow: hidden;
 	}
@@ -597,8 +598,9 @@ path {
 	font-size: 8px;
 	line-height: 1;
 	width: 50px;
-	margin-left: 6px;
+	margin-left: 4px;
 	color:#666; 
+	margin-top: -3px;
 }
 .timeline_select_desc{
 	
@@ -628,7 +630,7 @@ path {
 	max-height: 100%;
 }
 .copyright_desc{
-	margin-top: 15px;
+	margin-top: 12px;
 	font-size: 12px;
 	}
 .copyright_desc_2{

@@ -85,7 +85,7 @@ var checkData = function() {
 				label: '60-64'
 			},{
 				start: 65,
-				end: Infinity,
+				end: 72,
 				label: '65+'
 			}
 		];
@@ -109,7 +109,7 @@ var checkData = function() {
 				label: '50-65'
 			},{
 				start: 65,
-				end: Infinity,
+				end: 72,
 				label: '65+'
 			}
 		];
@@ -123,25 +123,30 @@ var checkData = function() {
 			var age_groups = [];
 			var r = array;
 			var max = 0;
+			var lng = 0;
+			
 			for (var i = 0; i < ranges.length; i++) {
 
 				var age_range = ranges[i];
+				
 				var g = spv.filter(r, field, function(value) {
 					var date = start_year - value;
 					if (date >= age_range.start && date <= age_range.end){
 						return true;
 					}
-
 				});
+				
 				age_groups.push(g);
 				r = g.not;
-				max = Math.max(max, g.length);
-				//console.log(g);
+				max = Math.max(max, (g.length / (age_range.end + 1 - age_range.start)));
+				lng = lng + age_range.end + 1 - age_range.start;
+                // console.log(lng);
 			}
+			
 			age_groups.max = max;
+			age_groups.lng = lng;
 
 			return age_groups;
-
 		};
 
 		var getGenderAgesGroups = function(age_ranges_to_use) {

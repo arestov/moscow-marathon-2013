@@ -453,7 +453,7 @@
 								"
 								pv-class="factoid {{ !( time_value|compareTime: '0:00:00' : '1:50:00' ) && 'hidden'}}" class="factoid hidden">
 							<img class="factoid_img" src="i/marathon.png" width=80 height=80 />
-							<h5 class="factoid_h">«νικῶμεν!»</h5>
+							<h5 class="factoid_h">«νενικήκαμεν»</h5>
 							<div class="factoid_d">или «Мы победили» — последние слова греческого воина Фидиппида, прибежавшего в&nbsp;Афины с&nbsp;поля боя близ Марафона (около 40 км)</div>
 						</div>
 
@@ -507,7 +507,7 @@
 								"
 								pv-class="factoid {{ !( time_value|compareTime: '1:50:00' : '3:30:00' ) && 'hidden'}}" class="factoid hidden">
 									<img class="factoid_img" src="i/small-globe.png" width=100 height=96/>
-									<div class="factoid_d">В марафоне участвовали спортсмены со всего мира: <b>из Парижа, Лондона, Токио, итальянского городка Кастровиллари, солнечной Калифорнии, далёкой Австралии, Роттердама и Бангкока.</b></h5></div>
+									<div class="factoid_d">В марафоне участвовали спортсмены со всего мира: <b>из Парижа, Лондона, Токио, итальянского городка Кастровиллари, Калифорнии, Австралии, Роттердама и Бангкока.</b></h5></div>
 							</div>
 
 
@@ -521,7 +521,7 @@
 				<div class="bmap_etc">			
 					<div class="legend">
 						<div class="legendcount_c">
-							<div>Бегунов на&nbsp;300 м</div>
+							<div>Бегунов на&nbsp;1&nbsp;км</div>
 							<div pv-anchor="legendcount" class="svgcon graph_has_text">
 								<div class="legendcount-text graph_text_block" pv-anchor="legendcounttext">
 										
@@ -544,11 +544,12 @@
 						<div>
 
 						<div id="vk_like" style="margin-top:5px;"></div>
+
 						<script type="text/javascript">
-						VK && VK.Widgets.Like("vk_like", {type: "mini"});
+						VK && VK.Widgets.Like("vk_like", {type: "mini", height: 20});
 						</script>
-							<div class="copyright_desc">Данные <a href="http://moscowmarathon.org/">с сайта марафона</a></div>
-							<div class="copyright_desc_2">Визуализация <a href="http://datalaboratory.ru/">Лаборатории данных</a></div>
+							<div class="copyright_desc"><a href="http://moscowmarathon.org/">Сайт марафона</a></div>
+							<div class="copyright_desc_2">Визуализация <a href="http://datalaboratory.ru/">Лаборатории&nbsp;данных</a></div>
 						</div>
 					</div>
 				</div>
@@ -802,6 +803,17 @@
 		<span pv-text="{{full_name}}"></span>
 	</div>
 </div>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-41635147-2', 'datalaboratory.ru');
+  ga('send', 'pageview');
+
+</script>
 
 </body>
 </html>
