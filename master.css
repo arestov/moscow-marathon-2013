@@ -235,6 +235,8 @@ path {
 
 .runners_header{
 	border-bottom: 1px solid #ccc;
+	position: relative;
+	z-index: 5;
 }
 .runners_header h2{
 	float:left;
@@ -247,6 +249,7 @@ path {
 	padding: 0 20px;
 	margin: 0 -20px;
 	width:100%;
+	
 }
 .filters{
 	clear:both;
@@ -333,10 +336,37 @@ path {
 	min-height: 1em;
 }
 .runrs_item{
-	overflow: hidden;
+	clear:both;
+	position: relative;
+	cursor: pointer;
+	}
+	.runr_selection_mark {
+		position: absolute;
+		left:-30px;
+		width: 16px;
+		height: 16px;
+		border-radius: 16px;
+		border: 1px solid red;
+		top:1px;
+		display: none;
+	}
+	.selected_runr .runr_selection_mark {
+		display: block;
+		background: pink;
+	}
+	.runrs_item:after {
+		visibility: hidden;
+        display: block;
+        content: "";
+        clear: both;
+        height: 0;
+
 	}
 	.runrs_item:hover{
 		background-color: #f3f3f3;
+		}
+		.runrs_item:hover .runr_selection_mark{
+			display: block;
 		}
 .runners_block{
 	

@@ -7,15 +7,17 @@
 	<link rel="shortcut icon" href="/i/favicon.ico">
 	<link rel="image_src" href="i/screenshot.png" />
 	<script data-main="njs/loader.js" src="njs/require-2.1.6.min.js"></script>
+	<!--
 	<script type="text/javascript" src="http://vk.com/js/api/openapi.js?101"></script>
 
 	<script type="text/javascript">
   		VK && VK.init({apiId: 3887279, onlyWidgets: true});
 	</script>
-
+	-->
 </head>
 <body>
 <div id="fb-root"></div>
+<!--
 <script>(function(d, s, id) {
   var js, fjs = d.getElementsByTagName(s)[0];
   if (d.getElementById(id)) return;
@@ -24,7 +26,7 @@
   fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));</script>
 
-
+-->
 <div class="big-wrap">
 	<div id="runs_map_compx">
 
@@ -537,7 +539,7 @@
 						</div>
 					</div>
 					
-					<div class="share">
+					<div class="share"><!--
 						<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://moscowmarathon.datalaboratory.ru/" data-lang="ru">Твитнуть</a>
 						<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
 						<div class="fb-like" data-href="http://moscowmarathon.datalaboratory.ru/" data-width="450" data-layout="button_count" data-show-faces="false" data-send="false" style="margin-top:5px;"></div>
@@ -550,7 +552,7 @@
 						</script>
 							<div class="copyright_desc"><a href="http://moscowmarathon.org/">Сайт марафона</a></div>
 							<div class="copyright_desc_2">Визуализация <a href="http://datalaboratory.ru/">Лаборатории&nbsp;данных</a></div>
-						</div>
+						</div>-->
 					</div>
 				</div>
 			</div>
@@ -756,7 +758,12 @@
 					</div>
 					<div class="runners_list" pv-anchor="runners_list">
 
-						<div pv-nest="runners_filtered" class="runrs_item">
+						<div 
+							pv-nest="runners_filtered" 
+							pv-events="click::switchSelection"
+							class="runrs_item" 
+							pv-class="runrs_item {{selected && 'selected_runr'}}">
+							<div class="runr_selection_mark"></div>
 							<div class="runr_pos" pv-text="{{selected_filter_gender && gender_pos}} {{!selected_filter_gender && pos}}"></div>
 							<div class="runr_name" pv-text="{{full_name}}"></div>
 							<div class="runr_num" pv-text="{{num}}"></div>
@@ -803,6 +810,7 @@
 		<span pv-text="{{full_name}}"></span>
 	</div>
 </div>
+<!--
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -814,6 +822,6 @@
   ga('send', 'pageview');
 
 </script>
-
+-->
 </body>
 </html>

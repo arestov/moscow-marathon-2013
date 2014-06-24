@@ -2,8 +2,114 @@ define(['d3', 'provoda', 'spv', 'libs/simplify', 'libs/veon', './modules/colors'
 function(d3, provoda, spv, simplify, veon, colors, mh, $) {
 "use strict";
 
+
+var place_finishers_at_finish = true;
+var SelRunner = function() {};
+provoda.View.extendTo(SelRunner, {
+	createBase: function() {
+		var con = document.createElementNS(mh.SVGNS, 'circle');
+		this.c = con;
+		this.d3_c = d3.select(con);
+
+		this.d3_c
+			.attr("cy", 0)
+			.attr("cx", 0)
+			.attr("r", 5)
+			.style({
+				'stroke-width': 2,
+				stroke: 'none',
+				"fill": 'white'
+			});
+
+
+		var title = document.createElementNS(mh.SVGNS, 'title');
+		con.appendChild(title);
+
+		this.d3_title = d3.select(title);
+	},
+	'compx-ftille': [
+		['raw'],
+		function(raw) {
+			if (!raw) {
+				return;
+			}
+			this.d3_title.text(raw.full_name);
+		}
+	],
+	'compx-fcolor': [
+		['raw'],
+		function(raw) {
+			if (!raw) {
+				return;
+			}
+			this.d3_c.style('stroke', raw.gender === 1 ? 'blue': 'red');
+		}
+	],
+
+	'compx-pos': [
+		['^geodata', '^basedet', '^time_value', '^start_time', 'raw', '^finish_point'],
+		function(geodata, basedet, time_value, start_time, raw, finish_point) {
+			if ( !(geodata && basedet && start_time && raw && finish_point) ) {
+				return;
+			}
+
+			
+			var current_distance = mh.getDistanceByRangesAndTime(raw, start_time + time_value * 1000);
+			current_distance = Math.max(0, current_distance);
+			var geo_coords = mh.getPointAtDistance(
+				geodata.geometry.coordinates,
+				current_distance
+			);
+
+			var px_coords;
+
+			if (geo_coords) {
+				px_coords = this.root_view.projection(geo_coords.target);
+				
+			} else {
+				if (place_finishers_at_finish) {
+					px_coords = this.root_view.projection(finish_point.target);
+					
+				}
+			}
+			if (!place_finishers_at_finish) {
+				if (px_coords) {
+					this.d3_c.style('display', 'block');
+				} else {
+					this.d3_c.style('display', 'none');
+				}
+			}
+
+			if (px_coords) {
+				this.d3_c
+					.attr("cx", px_coords[0])
+					.attr("cy", px_coords[1]);
+			}
+			
+			//
+		}
+	]
+});
+
 var RunMapCtr = function() {};
 provoda.View.extendTo(RunMapCtr, {
+	children_views: {
+		selected_runners: SelRunner
+	},
+	'compx-finish_point': [
+		['geodata'],
+		function(geodata) {
+			var total_distance = d3.geo.length(geodata) * mh.earth_radius;
+
+			return mh.getPointAtDistance(geodata.geometry.coordinates, total_distance);
+		}
+	],
+
+	'collch-selected_runners': {
+		place: function() {
+			return $(this.knodes.single_runners.node());
+		}
+	},
 	
 	createBase: function() {
 
@@ -33,7 +139,7 @@ provoda.View.extendTo(RunMapCtr, {
 		knodes.areas_group = main_group.append('g');
 
 		knodes.debug_group = main_group.append('g');
-
+		knodes.single_runners = main_group.append('g');
 
 
 
@@ -168,15 +274,15 @@ provoda.View.extendTo(RunMapCtr, {
 		}
 	},
 	'compx-genderpaths': {
-		depends_on: ['current_runners_data'],
-		fn: function(current_runners_data) {
-			if (!current_runners_data){
+		depends_on: ['cvs_data'],
+		fn: function(cvs_data) {
+			if (!cvs_data){
 				return;
 			}
 			this.knodes.age_areas = {};
 
 
-			var array = current_runners_data.runners_groups.slice().reverse();
+			var array = cvs_data.runners_groups.slice().reverse();
 			var _this = this;
 			array.forEach(function(el) {
 				var grad = _this.parent_view.parent_view.gender_grads[el.gender];
@@ -282,6 +388,9 @@ provoda.View.extendTo(RunMapCtr, {
 			}
 		}
 	},*/
+	'compx-start_time': [['cvs_data'], function(cvs_data) {
+		return cvs_data.start_time;
+	}],
 	'compx-basepathch':{
 		depends_on: ['basedet', 'basepath', 'scale'],
 		fn: function(basedet, basepath){
@@ -308,7 +417,7 @@ provoda.View.extendTo(RunMapCtr, {
 				return;
 			}
 			var data = mh.getPoints(current_runners_data.runners_groups, this.knodes, time_value, false, cvs_data.start_time, this.total_distance);
-			mh.drawRunnersPoints(colors, this.parent_view.parent_view.gender_grads, data, current_runners_data.items, this.knodes, time_value, cvs_data.start_time);
+			mh.drawRunnersPoints(colors, this.parent_view.parent_view.gender_grads, data, current_runners_data.items, this.knodes.debug_group, time_value, cvs_data.start_time);
 			//console.log();
 			//	xAxis.attr("x1", t[0]).attr("x2", t[0]);
 			//yAxis.attr("y1", t[1]).attr("y2", t[1]);

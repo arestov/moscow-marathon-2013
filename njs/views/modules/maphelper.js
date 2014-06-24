@@ -67,30 +67,40 @@ var getDistance = function(x1, y1, x2, y2, x) {
 	return ((x - x1) * (y2 - y1)) / (x2 - x1) + y1;
 };
 
-var getRangeByTime = function(el, time) {
-	var result;
+var getDistanceByRangesAndTime = function(el, miliseconds) {
+	var start, end;
+	var done = false;
 	for (var i = 0; i < el.result_steps.length; i++) {
 		var cur = el.result_steps[i];
 		var next = el.result_steps[i+1];
 		if (!cur || !next){
 			break;
 		}
-		if (cur.time <= time && next.time >= time){
-			result = {
-				start: cur,
-				end: next
-			};
+		if (cur.time <= miliseconds && next.time >= miliseconds){
+			done = true;
+
+			start = cur;
+			end = next;
+
 			break;
 		}
 
 		
 	}
-	if (!result){
-		result = {
-			start: el.result_steps[0],
-			end: el.result_steps[el.result_steps.length -1]
-		};
+	if (!done){
+		start = el.result_steps[0];
+		end = el.result_steps[el.result_steps.length -1];
 	}
+
+	return getDistance(
+		start.time, start.distance,
+		end.time,  end.distance,
+		miliseconds
+	);
+};
+
+var getRangeByTime = function(el, time) {
+	
 
 	return result;
 };
@@ -100,12 +110,10 @@ var getDistances = function(cvs, miliseconds, full) {
 	var result = [];
 	for (var i = 0; i < cvs.length; i++) {
 		var cur = cvs[i];
-		var range = getRangeByTime(cur, miliseconds);
 
-		var time = getDistance(
-			range.start.time, range.start.distance,
-			range.end.time,  range.end.distance,
-			miliseconds);
+
+		var time = getDistanceByRangesAndTime(cur, miliseconds);
+
 		if (typeof time == 'number' && !isNaN(time)){
 			result.push(full ? {
 				time: time,
@@ -391,9 +399,12 @@ var getBasePoints = function(base, boundrect, total_distance){
 	}
 };
 
-var drawRunnersPoints = function(colors, grads, data, cvs_data_items, knodes, seconds, start_time) {
+var drawRunnersPoints = function(colors, grads, data, cvs_data_items, place, seconds, start_time) {
 	var p_w = 3;
 	//var p_h = 3;
+	var point_radius = 2;
+	var margin_collapsable = 2;
+
 	var getSQPoint = function(width, num) {
 		var row_capacity = Math.floor(width/p_w);
 		if (!row_capacity){
@@ -404,8 +415,8 @@ var drawRunnersPoints = function(colors, grads, data, cvs_data_items, knodes, se
 		//var x,y;
 
 		return {
-			x: 2 + (4 * (remainder - 1)),
-			y: 2 + (4 * (row - 1))
+			x: margin_collapsable + ( ( point_radius * 2 + margin_collapsable) * (remainder - 1)),
+			y: margin_collapsable + ( ( point_radius * 2 + margin_collapsable) * (row - 1))
 		};
 	//var
 
@@ -429,7 +440,7 @@ var drawRunnersPoints = function(colors, grads, data, cvs_data_items, knodes, se
 			node.append('circle')
 				.attr("cy", data.y)
 				.attr("cx", data.x)
-				.attr("r", 1)
+				.attr("r", point_radius)
 				.style({
 					stroke: 'none',
 					"fill": color
@@ -444,7 +455,6 @@ var drawRunnersPoints = function(colors, grads, data, cvs_data_items, knodes, se
 
 
 		var i,cur;
-		var place = knodes.debug_group;
 		place.selectAll('*').remove();
 
 		var dfrag = document.createDocumentFragment();
@@ -600,7 +610,8 @@ var getPointAtDistance = function(array, distance, altitude){
 				point: el,
 				distance: d3.geo.distance(el, array[i-1]) + distances[i-1].distance
 			};
-			if ((distances[i-1].distance * earth_radius) <= distance && (cur.distance * earth_radius) > distance){
+			var matched_section = (distances[i-1].distance * earth_radius) <= distance && (cur.distance * earth_radius) >= distance;
+			if (matched_section){
 				target = {
 					start: distances[i-1],
 					end: cur
@@ -686,7 +697,8 @@ return {
 
 	},
 	getDistance: getDistance,
-	drawRunnersPoints: drawRunnersPoints
+	drawRunnersPoints: drawRunnersPoints,
+	getDistanceByRangesAndTime: getDistanceByRangesAndTime
 };
 
 

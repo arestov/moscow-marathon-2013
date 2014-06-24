@@ -7,9 +7,10 @@ BrowseMap.Model.extendTo(Runner, {
 	init: function(opts, raw) {
 		this._super(opts);
 		this.mapStates(this.raw_map_st, raw, true);
+		this.updateState('raw', raw);
 		this.initStates();
 		this.wch(this.map_parent, 'selected_filter_gender');
-
+		this.rawdata = raw;
 
 
 		/*		var tstr;
@@ -22,6 +23,10 @@ BrowseMap.Model.extendTo(Runner, {
 					tstr = moment(cur.relative_to_day)
 					.format(cur.last ? 'HH:mm:ss' : 'HH:mm');
 				}*/
+	},
+	switchSelection: function() {
+		this.map_parent.switchSelectRunner(this);
+		
 	},
 	'compx-full_time_string':{
 		depends_on: ['start_time', 'result_time'],

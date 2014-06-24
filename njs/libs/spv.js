@@ -44,6 +44,7 @@ var hasArg = function(el) {return el;};
 spv.hasEveryArgs = function() {
 	return Array.prototype.every.call(arguments, hasArg);
 };
+
 spv.getExistingItems = function(arr) {
 	var result = [];
 	for (var i = 0; i < arr.length; i++) {

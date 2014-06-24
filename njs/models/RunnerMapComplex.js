@@ -23,11 +23,19 @@ provoda.HModel.extendTo(RunMap, {
 		this._super(opts);
 
 		this.wch(this.map_parent.map_parent, 'selected_time');
+
+		this.wch(this.map_parent.map_parent.map_parent, 'current_runners_data');
+		
 		this.updateState('geodata', geodata);
 		cvsloader.on('load', function(cvs_data) {
-			this.updateState('current_runners_data', cvs_data);
+
 			this.updateState('cvs_data', cvs_data);
 		}, this.getContextOpts());
+
+		var _this = this;
+		this.app.on('child_change-selected_runners', function(e) {
+			_this.updateNesting('selected_runners', e.value);
+		});
 	}
 });
 

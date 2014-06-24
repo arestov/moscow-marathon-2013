@@ -38,6 +38,7 @@ BrowseMap.Model.extendTo(StartPage, {
 		this.updateState('query', '');
 		
 		cvsloader.on('load', function(data) {
+			this.cvsdata = data;
 			var runners = [];
 			for (var i = 0; i < data.items.length; i++) {
 				var runner = new Runner();
@@ -48,6 +49,8 @@ BrowseMap.Model.extendTo(StartPage, {
 			this.updateNesting('runners', runners);
 			this.getIndexes(runners, data);
 			this.makeFiltersResult();
+
+			
 		}, this.getContextOpts());
 
 		this.filters = {};
@@ -72,10 +75,42 @@ BrowseMap.Model.extendTo(StartPage, {
 		this.wch(this, 'current_pages', function() {
 			this.checkRunners();
 		});
+
+		this.on('child_change-full_filtered_list', function(e) {
+			if (!e.value) {
+				return;
+			}
+
+			var raw_array = spv.filter(e.value, 'rawdata');
+			var obj = cvsloader.getGenderAgesGroups(raw_array, this.cvsdata.age_ranges, this.cvsdata.start_year);
+			obj.items = raw_array;
+			this.app.updateState('current_runners_data', obj);
+
+		});
 		
 		return this;
 	},
 	page_limit: 100,
+	switchSelectRunner: function(md) {
+		var arr = this.app.getNesting('selected_runners') || [];
+
+		var pos = arr.indexOf(md);
+		if (pos == -1) {
+			if (arr.length == 5) {
+				var elder_md = arr.shift();
+				elder_md.updateState('selected', false);
+			}
+			
+			arr.push(md);
+
+			md.updateState('selected', true);
+			this.app.updateNesting('selected_runners', arr);
+		} else {
+			md.updateState('selected', false);
+			arr.splice(pos, 1);
+			this.app.updateNesting('selected_runners', arr);
+		}
+	},
 	makeSearch: function(query) {
 		this.updateState('query', query);
 	},
@@ -317,6 +352,8 @@ BrowseMap.Model.extendTo(StartPage, {
 		if (!result){
 			return;
 		}
+
+		this.updateNesting('full_filtered_list', result);
 		
 		var current_pages;
 		if (!reset_page){

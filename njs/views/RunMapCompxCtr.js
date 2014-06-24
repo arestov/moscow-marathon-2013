@@ -40,7 +40,7 @@ provoda.View.extendTo(RunMapCompxCtr, {
 		this.setVisState('con_width', relative_con.width());
 
 		var changeTime = function(pos) {
-			var factor = pos/(_this.state('vis_con_width') + _this.marker_width);
+			var factor = pos/_this.state('vis_con_width');
 			factor = Math.min(factor, 1);
 			factor = Math.max(factor, 0);
 			_this.promiseStateUpdate('', factor);
