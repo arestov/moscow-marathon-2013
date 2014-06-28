@@ -762,7 +762,7 @@
 							pv-nest="runners_filtered" 
 							pv-events="click::switchSelection"
 							class="runrs_item" 
-							pv-class="runrs_item {{selected && 'selected_runr'}}">
+							pv-class="runrs_item {{selected && 'selected_runr'}} {{gender === 0 && 'runr_female'}} {{gender !== 0 && 'runr_male'}}">
 							<div class="runr_selection_mark"></div>
 							<div class="runr_pos" pv-text="{{selected_filter_gender && gender_pos}} {{!selected_filter_gender && pos}}"></div>
 							<div class="runr_name" pv-text="{{full_name}}"></div>

@@ -30,18 +30,23 @@ provoda.View.extendTo(StartPageCtr, {
 		this.list = this.tpl.ancs['runners_list'];
 
 		this.promiseStateUpdate('header_height', this.header.height());
-		this.checkListPos();
+
+
 
 
 
 		var _this = this;
-		$(window).on('resize', function() {
+		$(window).on('resize', spv.throttle(function() {
+			_this.checkListWidth();
+			_this.checkListPos();
+			_this.checkFixPos();
 
-		});
+		}, 150));
 		this.wch(this.root_view, 'mapheight', function(e) {
 			if (!e.value){
 				return;
 			}
+			this.checkListWidth();
 			this.checkListPos();
 			this.checkFixPos();
 		});
@@ -59,26 +64,27 @@ provoda.View.extendTo(StartPageCtr, {
 			this.checkFixPos();
 		});
 	},
+	checkListWidth: function() {
+		this.list_width = this.list.width();
+	},
 	checkFixPos: function() {
-		//header_fixed
 		
 		var list_top = this.state('list_top');
 		var list_bottom = this.state('list_bottom');
 		var header_height = this.state('header_height');
 		if (list_top && list_bottom){
 
-			var list_width = this.list.width();
+			var list_width = this.list_width;
 
-			var header_fixed = this.state('header_fixed');
-			var possible_top = (header_fixed ? list_top - header_height : list_top) - header_height;
-			var possible_bottom = (header_fixed ? list_bottom - header_height : list_bottom);
+			var possible_top = list_top - header_height;
+			var possible_bottom = list_bottom;
 			var scroll_top = $(window).scrollTop();
 			var need_fix = scroll_top > possible_top && scroll_top < possible_bottom;
 			this.header.toggleClass('fixed_rheader', need_fix);
 			this.list.css('margin-top', need_fix ? (header_height + 'px') : '' );
 			this.header.css({
-				left: this.list_offset.left,
-				width: list_width
+				left: need_fix ? this.list_offset.left : '',
+				width: need_fix ? list_width : ''
 			});
 		}
 

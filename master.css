@@ -234,9 +234,10 @@ path {
 }
 
 .runners_header{
-	border-bottom: 1px solid #ccc;
 	position: relative;
 	z-index: 5;
+	border-bottom: 1px solid #ccc;
+	
 }
 .runners_header h2{
 	float:left;
@@ -352,7 +353,29 @@ path {
 	}
 	.selected_runr .runr_selection_mark {
 		display: block;
-		background: pink;
+		
+	}
+	.runrs_item.runr_female .runr_selection_mark {
+
+		border-color: #880e4f;
+	}
+	.runrs_item.runr_male .runr_selection_mark {
+
+		border-color: #2a36b1;
+
+
+		
+	}
+	.runrs_item.runr_female.selected_runr .runr_selection_mark {
+		background: #f48fb1;
+
+	}
+	.runrs_item.runr_male.selected_runr .runr_selection_mark {
+		background: #afbfff;
+
+
+
+		
 	}
 	.runrs_item:after {
 		visibility: hidden;
@@ -362,8 +385,16 @@ path {
         height: 0;
 
 	}
+	
+	
 	.runrs_item:hover{
 		background-color: #f3f3f3;
+		}
+	.runrs_item.runr_female:hover{
+		background-color: #fce4ec;
+		}
+	.runrs_item.runr_male:hover{
+		background-color: #e7e9fd;
 		}
 		.runrs_item:hover .runr_selection_mark{
 			display: block;
