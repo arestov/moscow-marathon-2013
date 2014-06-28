@@ -14,6 +14,7 @@ provoda.HModel.extendTo(TimeGraph, {
 		cvsloader.on('load', function(cvs_data) {
 			this.updateState('cvs_data', cvs_data);
 		}, this.getContextOpts());
+		this.wch(this.map_parent.map_parent, 'current_runners_data');
 	}
 });
 

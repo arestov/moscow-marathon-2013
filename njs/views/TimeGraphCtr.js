@@ -294,9 +294,9 @@ provoda.View.extendTo(TimeGraphCtr, {
 	px_step: 3,
 	y_scale: 1.2,
 	'compx-base_graph_data': {
-		depends_on: ['basedet', 'cvs_data'],
-		fn: function(basedet, cvs_data) {
-			if (!basedet || !cvs_data){
+		depends_on: ['basedet', 'cvs_data', 'current_runners_data'],
+		fn: function(basedet, cvs_data, current_runners_data) {
+			if (!basedet || !cvs_data || !current_runners_data){
 				return;
 			}
 
@@ -344,12 +344,12 @@ provoda.View.extendTo(TimeGraphCtr, {
 				return runners_by_time;
 			};
 
-			var reversed_groups = cvs_data.runners_groups.slice();
+			var reversed_groups = current_runners_data.runners_groups.slice();
 			reversed_groups.reverse();
 
 			var runners_byd = {};
 
-			cvs_data.runners_groups.forEach(function(el) {
+			current_runners_data.runners_groups.forEach(function(el) {
 				runners_byd[el.key] = getRunnersByTime(el.runners);
 			});
 			var steps_data = [];
@@ -485,14 +485,14 @@ provoda.View.extendTo(TimeGraphCtr, {
 		}
 	},
 	'compx-draw': {
-		depends_on: ['base_graph_data', 'cvs_data', 'age_areas'],
-		fn: function(base_graph_data, cvs_data, age_areas) {
-			if (!base_graph_data || !cvs_data ||!age_areas){
+		depends_on: ['base_graph_data', 'current_runners_data', 'age_areas'],
+		fn: function(base_graph_data, current_runners_data, age_areas) {
+			if (!base_graph_data || !current_runners_data ||!age_areas){
 				return;
 			}
 			var _this = this;
 
-			var reversed_groups = cvs_data.runners_groups.slice();
+			var reversed_groups = current_runners_data.runners_groups.slice();
 			reversed_groups.reverse();
 			var points_byd = {};
 
@@ -547,13 +547,13 @@ provoda.View.extendTo(TimeGraphCtr, {
 				result += ' Z';
 				return result;
 			};
-			cvs_data.runners_groups.forEach(function(el) {
+			current_runners_data.runners_groups.forEach(function(el) {
 				
 				areas_data[el.key] = getRunByDPathData(points_byd[el.key]);
 			});
 
 
-			cvs_data.runners_groups.forEach(function(el) {
+			current_runners_data.runners_groups.forEach(function(el) {
 				age_areas[el.key].attr("d", areas_data[el.key]);
 			});
 
