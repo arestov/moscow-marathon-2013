@@ -9,7 +9,7 @@ BrowseMap.Model.extendTo(Runner, {
 		this.mapStates(this.raw_map_st, raw, true);
 		this.updateState('raw', raw);
 		this.initStates();
-		this.wch(this.map_parent, 'selected_filter_gender');
+		this.wlch(this.map_parent, 'selected_filter_gender');
 		this.rawdata = raw;
 
 

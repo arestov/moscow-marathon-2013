@@ -146,6 +146,7 @@ path {
 	float:right;
 	width: 160px;
 	padding-top: 140px;
+	overflow: hidden;
 	}
 	.weather{
 		position: absolute;

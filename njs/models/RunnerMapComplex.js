@@ -9,12 +9,12 @@ provoda.HModel.extendTo(TimeGraph, {
 	init: function(opts) {
 		this._super(opts);
 
-		this.wch(this.map_parent, 'selected_time');
+		this.wlch(this.map_parent, 'selected_time');
 		this.updateState('geodata', geodata);
 		cvsloader.on('load', function(cvs_data) {
 			this.updateState('cvs_data', cvs_data);
 		}, this.getContextOpts());
-		this.wch(this.map_parent.map_parent, 'current_runners_data');
+		this.wlch(this.map_parent.map_parent, 'current_runners_data');
 	}
 });
 
@@ -23,9 +23,9 @@ provoda.HModel.extendTo(RunMap, {
 	init: function(opts) {
 		this._super(opts);
 
-		this.wch(this.map_parent.map_parent, 'selected_time');
+		this.wlch(this.map_parent.map_parent, 'selected_time');
 
-		this.wch(this.map_parent.map_parent.map_parent, 'current_runners_data');
+		this.wlch(this.map_parent.map_parent.map_parent, 'current_runners_data');
 		
 		this.updateState('geodata', geodata);
 		cvsloader.on('load', function(cvs_data) {
@@ -80,7 +80,7 @@ provoda.HModel.extendTo(RunnerMapComplex, {
 
 
 		this.setTime(0.2);
-		this.wch(this.app, 'current_runner_data');
+		this.wlch(this.app, 'current_runner_data');
 	},
 	setTime: function(factor) {
 		this.updateState('selected_time', factor);
