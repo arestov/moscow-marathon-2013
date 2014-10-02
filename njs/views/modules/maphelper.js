@@ -172,33 +172,43 @@ var formatCurve = function(prev_pcurv2, pcurv1, endp){
 
 
 var getAreaPathData = function(area, base_districts, prev_districts) {
+	//area is from getAreaByData()
+
 	var bstr = "M";
-//	var target = [];
-	var part1 = [], part2 = [];
 	var cur;
 	var i, prevp;
 
 	var zero_base_district = base_districts[0];
 
 	bstr += format(zero_base_district.pm);
+
+	bstr += ' C';
+	//var part1 = [];
 	for (i = 1; i < area.length; i++) {
 
 		prevp = (i - 1 === 0) ? zero_base_district.pcurv2 :  area[ i - 1 ].pcurv2;
 		cur = area[i];
-		part1.push(formatCurve(prevp, cur.pcurv1, cur.pm));
+		//part1.push(formatCurve(prevp, cur.pcurv1, cur.pm));
+		bstr += formatCurve(prevp, cur.pcurv1, cur.pm) + ' ';
 	}
-	bstr += ' C' + part1.join(' ');
+	//bstr += part1.join(' ');
+
+
+
 	bstr += ' L' + format(base_districts[ base_districts.length - 1 ].pm);
 
 
+	bstr += ' C';
+	//var part2 = [];
 	for (i = (prev_districts.length - 1) - 1; i >= 0; i--) {
 		prevp = prev_districts[i+1].pcurv1;
 		cur = (i === 0) ? base_districts[0] : prev_districts[i];
-		part2.push(formatCurve(prevp, cur.pcurv2, cur.pm));
+		//part2.push(formatCurve(prevp, cur.pcurv2, cur.pm));
+		bstr += formatCurve(prevp, cur.pcurv2, cur.pm) + ' ';
 
 	}
-
-	bstr += ' C' + part2.join(' ') + 'Z';
+	//bstr += part2.join(' ');
+	bstr += 'Z';
 	return bstr;
 
 };
@@ -246,14 +256,27 @@ var getAreaByData = function(runners_array, base_districts, prev_districts, seco
 	for (i = 0; i < base_districts.length; i++) {
 		cur = base_districts[i];
 		prev_di = prev_districts[i];
-		var obj = {};
+		var obj = {
+			pcurv1: null,
+			pcurv2: null,
+			pm: null,
+			height: null,
+			runners_num: null
+			
+		};
+
+
+
+
 		var runners = steps_runners[i];
 		//max_runners = Math.max(max_runners, runners);
 		//var value = Math.random()*20 + 5;
 		//var value = runners_pxheight_factor * runners;
 		var value = getHeightByRunners(runners, step);
 		obj.height = value;
-		obj.runners = runners;
+		obj.runners_num = runners;
+
+		
 
 		var spcurv1 = getPointOnPerpendicularM(prev_di.pcurv1, prev_di.pcurv2, prev_di.pcurv1, obj.height);
 		var spcurv2 = getPointOnPerpendicularM(prev_di.pcurv1, prev_di.pcurv2, prev_di.pcurv2, obj.height);
@@ -271,8 +294,15 @@ var getAreaByData = function(runners_array, base_districts, prev_districts, seco
 			x: perppoints[0],
 			y: perppoints[1]
 		};
+
+		//area.push( value, runners, pcurv1, pcurv2, pm );
+
+
 		//setMorePoints(obj, cur);
 		//setRunnersPoints(obj, cur);
+
+
+
 		area.push(obj);
 
 
@@ -369,17 +399,25 @@ var getBasePoints = function(base, boundrect, total_distance){
 				p1 = c1.p,
 				p2 = c2.p;
 
+
+			var start = c1.l/px_in_m;
+			var end = c2.l/px_in_m;
+
 			var obj = {
-				p1: p1,
-				p2: p2,
-				start: c1.l/px_in_m,
-				end: c2.l/px_in_m,
+				pcurv1: null,
+				pcurv2: null,
 				pm: {
 					x: (p1.x + p2.x)/2,
 					y: (p1.y + p2.y)/2
 				},
+				p1: p1,
+				p2: p2,
+				start: start,
+				end: end,
+				
 				dist: getPointsDistanceM(p1, p2),
-				angle: getAngleBySegmentsPointsM(p1, p2, x_axis_points.p1, x_axis_points.p2)
+				angle: getAngleBySegmentsPointsM(p1, p2, x_axis_points.p1, x_axis_points.p2),
+				
 			};
 
 			obj.pcurv1 = getPointOnLine(p1, obj.angle, obj.dist * (1/4));
@@ -599,32 +637,51 @@ var getPoints = function(runners_groups, knodes, seconds, animate, start_time, t
 
 
 var getPointAtDistance = function(array, distance, altitude){
-	var distances = [];
+	//var distances = [];
 	//var sub_distance = distance/earth_radius;
 	var target;
+
+	var prev_point;
+	var prev_distance;
 	for (var i = 0; i < array.length; i++) {
 		var el = array[i];
 		if (i){
 
-			var cur = {
-				point: el,
-				distance: d3.geo.distance(el, array[i-1]) + distances[i-1].distance
-			};
-			var matched_section = (distances[i-1].distance * earth_radius) <= distance && (cur.distance * earth_radius) >= distance;
+			var cur_point = el;
+			var cur_distance = d3.geo.distance(el, array[i-1]) + prev_distance;
+
+			/*var cur = {
+				point: cur_point,
+				distance: cur_distance
+			};*/
+			var matched_section = (prev_distance * earth_radius) <= distance && (cur_distance * earth_radius) >= distance;
 			if (matched_section){
 				target = {
-					start: distances[i-1],
-					end: cur
+					start: {
+						point: prev_point,
+						distance: prev_distance
+					},
+					end: {
+						point: cur_point,
+						distance: cur_distance
+					}
 				};
 				break;
 			}
-			distances.push(cur);
+
+			prev_point = cur_point;
+			prev_distance = cur_distance;
+
+		//	distances.push(cur);
 
 		} else {
-			distances.push({
+			prev_point = el;
+			prev_distance = 0;
+
+		/*	distances.push({
 				point: el,
 				distance: 0
-			});
+			});*/
 		}
 	}
 	if (target){
